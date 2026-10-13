@@ -1,201 +1,1004 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Inventory Management</title>
+
 <style>
-body{font-family:Arial;background:#f3f5f9;margin:25px;color:#1f2937}
-header,.cards,.filters,form{display:flex;gap:12px;flex-wrap:wrap}
-header{justify-content:space-between;align-items:center}
-.cards{margin:20px 0}
-.card,section{background:white;padding:18px;border-radius:10px;margin-bottom:18px;flex:1}
-input,select,button{padding:10px;border:1px solid #ddd;border-radius:5px}
-button{background:#2563eb;color:white;cursor:pointer}
-table{width:100%;border-collapse:collapse;margin-top:15px;background:white}
-th,td{text-align:left;padding:10px;border-bottom:1px solid #ddd}
-th{background:#e8efff}
-.wrap{overflow-x:auto}.low{color:#dc2626;font-weight:bold}
-#message{font-weight:bold}
+:root {
+    --primary: #4338ca;
+    --primary-dark: #3730a3;
+    --background: #f5f6fa;
+    --surface: #ffffff;
+    --text: #172033;
+    --muted: #64748b;
+    --border: #e5e7eb;
+    --success: #15803d;
+    --success-bg: #dcfce7;
+    --danger: #b91c1c;
+    --danger-bg: #fee2e2;
+    --warning: #9a3412;
+    --warning-bg: #ffedd5;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: var(--background);
+    color: var(--text);
+}
+
+button, input, select { font: inherit; }
+
+button {
+    cursor: pointer;
+    border: 0;
+    border-radius: 7px;
+    padding: 10px 14px;
+    font-weight: 600;
+}
+
+button:disabled { opacity: .6; cursor: wait; }
+
+.primary { background: var(--primary); color: white; }
+.primary:hover { background: var(--primary-dark); }
+.secondary { background: #eef2ff; color: var(--primary); }
+.danger { background: var(--danger-bg); color: var(--danger); }
+.small { padding: 7px 10px; font-size: 12px; }
+
+.header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 4%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.brand { display: flex; align-items: center; gap: 12px; }
+
+.brand-icon {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 11px;
+    background: #eef2ff;
+    color: var(--primary);
+    font-size: 23px;
+}
+
+h1 { margin: 0; font-size: 22px; }
+h2 { margin: 0; font-size: 17px; }
+.muted { color: var(--muted); font-size: 12px; }
+
+.header-actions { display: flex; gap: 9px; flex-wrap: wrap; }
+
+.container {
+    width: 94%;
+    max-width: 1400px;
+    margin: 26px auto;
+}
+
+.section-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.grid { display: grid; gap: 17px; }
+
+.stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-bottom: 22px;
+}
+
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    min-width: 0;
+}
+
+.stat-label { color: var(--muted); font-size: 13px; font-weight: 600; }
+.stat-value { font-size: 29px; font-weight: 750; margin-top: 12px; }
+.stat-top { display: flex; justify-content: space-between; align-items: center; }
+
+.stat-icon {
+    background: #eef2ff;
+    color: var(--primary);
+    border-radius: 9px;
+    padding: 9px;
+    font-size: 20px;
+}
+
+.content-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-bottom: 22px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.field { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+.field.full { grid-column: 1 / -1; }
+
+label { font-size: 12px; font-weight: 700; color: #475569; }
+
+input, select {
+    width: 100%;
+    min-width: 0;
+    padding: 11px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+    background: white;
+    color: var(--text);
+    outline: none;
+}
+
+input:focus, select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px #4338ca18;
+}
+
+.form-actions { display: flex; gap: 9px; margin-top: 17px; flex-wrap: wrap; }
+.message { font-size: 12px; min-height: 15px; margin-top: 10px; }
+.message.error { color: var(--danger); }
+.message.success { color: var(--success); }
+
+.toolbar {
+    display: grid;
+    grid-template-columns: minmax(180px, 1fr) 220px auto;
+    gap: 10px;
+    margin: 17px 0;
+}
+
+.table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+table { width: 100%; border-collapse: collapse; font-size: 13px; white-space: nowrap; }
+th, td { text-align: left; padding: 13px 14px; border-bottom: 1px solid var(--border); }
+
+th {
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .3px;
+}
+
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr:hover { background: #fafaff; }
+
+.badge {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.badge.in-stock { background: var(--success-bg); color: var(--success); }
+.badge.low-stock { background: var(--warning-bg); color: var(--warning); }
+.badge.out-stock { background: var(--danger-bg); color: var(--danger); }
+.badge.in { background: var(--success-bg); color: var(--success); }
+.badge.out { background: var(--danger-bg); color: var(--danger); }
+
+.actions { display: flex; gap: 6px; }
+.empty { text-align: center; color: var(--muted); padding: 28px; }
+.table-footer { margin-top: 12px; color: var(--muted); font-size: 12px; }
+
+#toastArea {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 100;
+    display: grid;
+    gap: 8px;
+    width: min(370px, calc(100% - 32px));
+}
+
+.toast {
+    background: white;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--success);
+    border-radius: 8px;
+    padding: 13px;
+    box-shadow: 0 5px 20px #00000010;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.toast.error { border-left-color: var(--danger); }
+
+footer {
+    text-align: center;
+    padding: 20px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+@media (max-width: 850px) {
+    .content-grid { grid-template-columns: 1fr; }
+    .toolbar { grid-template-columns: 1fr 1fr; }
+    .toolbar input { grid-column: 1 / -1; }
+}
+
+@media (max-width: 540px) {
+    .stats { grid-template-columns: 1fr; }
+    .form-grid { grid-template-columns: 1fr; }
+    .field.full { grid-column: auto; }
+    .toolbar { grid-template-columns: 1fr; }
+    .toolbar input { grid-column: auto; }
+    .card { padding: 15px; }
+    h1 { font-size: 19px; }
+}
 </style>
 </head>
+
 <body>
-<header><h1>Inventory Management System</h1>
-<button onclick="exportExcel()">Export Excel</button></header>
 
-<div class="cards">
-<section class="card">Total Products<h2 id="total">Loading...</h2></section>
-<section class="card">Stock Value<h2 id="value">Loading...</h2></section>
-<section class="card">Low Stock<h2 id="low">Loading...</h2></section>
-<section class="card">Total Units<h2 id="units">Loading...</h2></section>
-</div>
+<header class="header">
+    <div class="brand">
+        <div class="brand-icon">▦</div>
+        <div>
+            <h1>Inventory Management</h1>
+            <span class="muted">Products & stock control</span>
+        </div>
+    </div>
 
-<section>
-<h2 id="formTitle">Add Product</h2>
-<form id="productForm">
-<input id="editId" type="hidden">
-<input id="name" placeholder="Product name" required>
-<input id="category" placeholder="Category" required>
-<input id="price" type="number" min="0" step=".01" placeholder="Price" required>
-<input id="quantity" type="number" min="0" step="1" placeholder="Quantity" required>
-<input id="minStock" type="number" min="0" value="5" placeholder="Minimum stock" required>
-<button>Save Product</button>
-<button type="button" onclick="resetForm()">Cancel</button>
-</form>
-</section>
+    <div class="header-actions">
+        <button id="refreshBtn" class="secondary" type="button">↻ Refresh</button>
+        <button id="exportBtn" class="primary" type="button">↓ Download Excel</button>
+    </div>
+</header>
 
-<section>
-<h2>Stock In / Out</h2>
-<form id="stockForm">
-<select id="stockProduct" required></select>
-<select id="stockType"><option value="IN">Stock In</option><option value="OUT">Stock Out</option></select>
-<input id="stockQty" type="number" min="1" step="1" placeholder="Quantity" required>
-<button>Update Stock</button>
-</form>
-</section>
+<main class="container">
 
-<section>
-<h2>Products</h2>
-<div class="filters">
-<input id="search" placeholder="Search product" oninput="loadProducts()">
-<select id="categoryFilter" onchange="loadProducts()">
-<option value="">All categories</option>
-</select>
-</div>
-<div class="wrap"><table>
-<thead><tr><th>ID</th><th>Name</th><th>Category</th><th>Price</th><th>Qty</th><th>Value</th><th>Status</th><th>Actions</th></tr></thead>
-<tbody id="products"></tbody>
-</table></div>
-<h2>Recent Stock Transactions</h2>
-<div class="wrap"><table>
-<thead><tr><th>Product</th><th>Type</th><th>Quantity</th><th>Date</th></tr></thead>
-<tbody id="transactions"></tbody>
-</table></div>
-<p id="message"></p>
-</section>
+    <div class="section-heading">
+        <h2>Overview</h2>
+        <span class="muted" id="lastUpdated">Loading...</span>
+    </div>
+
+    <section class="grid stats">
+        <article class="card">
+            <div class="stat-top">
+                <span class="stat-label">Total Products</span>
+                <span class="stat-icon">▦</span>
+            </div>
+            <div class="stat-value" id="totalProducts">—</div>
+        </article>
+
+        <article class="card">
+            <div class="stat-top">
+                <span class="stat-label">Total Stock Value</span>
+                <span class="stat-icon">₹</span>
+            </div>
+            <div class="stat-value" id="stockValue">—</div>
+        </article>
+
+        <article class="card">
+            <div class="stat-top">
+                <span class="stat-label">Low Stock Products</span>
+                <span class="stat-icon">!</span>
+            </div>
+            <div class="stat-value" id="lowStock">—</div>
+        </article>
+    </section>
+
+    <section class="grid content-grid">
+
+        <article class="card" id="productCard">
+            <div class="section-heading">
+                <h2 id="productFormTitle">Add Product</h2>
+            </div>
+
+            <form id="productForm">
+                <input type="hidden" id="productId">
+
+                <div class="form-grid">
+                    <div class="field full">
+                        <label for="productName">Product Name *</label>
+                        <input id="productName" maxlength="150" required placeholder="Enter product name">
+                    </div>
+
+                    <div class="field">
+                        <label for="productCategory">Category *</label>
+                        <select id="productCategory" required>
+                            <option value="">Select category</option>
+                            <option value="Electronics">Electronics</option>
+                            <option value="Accessories">Accessories</option>
+                            <option value="Furniture">Furniture</option>
+                            <option value="Stationery">Stationery</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label for="productPrice">Unit Price (₹) *</label>
+                        <input id="productPrice" type="number" min="0" step="0.01" required placeholder="0.00">
+                    </div>
+
+                    <div class="field" id="openingStockField">
+                        <label for="productQuantity">Opening Quantity *</label>
+                        <input id="productQuantity" type="number" min="0" step="1" value="0" required>
+                    </div>
+
+                    <div class="field">
+                        <label for="productMinStock">Minimum Stock *</label>
+                        <input id="productMinStock" type="number" min="0" step="1" value="0" required>
+                    </div>
+                </div>
+
+                <p id="editHint" class="muted" hidden>
+                    Use Stock In or Stock Out to change quantity.
+                </p>
+
+                <div class="form-actions">
+                    <button class="primary" id="saveProductBtn" type="submit">Add Product</button>
+                    <button class="secondary" id="cancelEditBtn" type="button" hidden>Cancel</button>
+                </div>
+
+                <div id="productMessage" class="message" role="status"></div>
+            </form>
+        </article>
+
+        <article class="card">
+            <div class="section-heading">
+                <h2>Update Stock</h2>
+            </div>
+
+            <form id="stockForm">
+                <div class="form-grid">
+                    <div class="field full">
+                        <label for="stockProduct">Product *</label>
+                        <select id="stockProduct" required>
+                            <option value="">Select product</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label for="stockType">Movement *</label>
+                        <select id="stockType" required>
+                            <option value="">Select movement</option>
+                            <option value="IN">Stock In (+)</option>
+                            <option value="OUT">Stock Out (-)</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label for="stockQuantity">Quantity *</label>
+                        <input id="stockQuantity" type="number" min="1" step="1" required placeholder="Enter quantity">
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button class="primary" id="updateStockBtn" type="submit">Update Stock</button>
+                    <button class="secondary" type="reset">Clear</button>
+                </div>
+
+                <div id="stockMessage" class="message" role="status"></div>
+            </form>
+        </article>
+    </section>
+
+    <section class="card" style="margin-bottom:22px">
+        <div class="section-heading">
+            <h2>Product Inventory</h2>
+            <span id="productCount" class="muted">0 products</span>
+        </div>
+
+        <div class="toolbar">
+            <input id="searchInput" type="search" placeholder="Search products...">
+
+            <select id="categoryFilter" aria-label="Filter by category">
+                <option value="">All Categories</option>
+                <option value="Electronics">Electronics</option>
+                <option value="Accessories">Accessories</option>
+                <option value="Furniture">Furniture</option>
+                <option value="Stationery">Stationery</option>
+                <option value="Other">Other</option>
+            </select>
+
+            <button id="clearFiltersBtn" class="secondary" type="button">Clear Filters</button>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Product</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Stock Value</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody id="productsBody">
+                    <tr><td colspan="8" class="empty">Loading products...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="productTableStatus" class="table-footer">Loading...</div>
+    </section>
+
+    <section class="card">
+        <div class="section-heading">
+            <h2>Recent Stock Transactions</h2>
+            <span id="transactionCount" class="muted">0 transactions</span>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Transaction ID</th>
+                        <th>Product</th>
+                        <th>Movement</th>
+                        <th>Quantity</th>
+                        <th>Date & Time</th>
+                    </tr>
+                </thead>
+
+                <tbody id="transactionsBody">
+                    <tr><td colspan="5" class="empty">Loading transactions...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+</main>
+
+<div id="toastArea" aria-live="polite"></div>
+<footer>Inventory Management System</footer>
 
 <script>
-const $=id=>document.getElementById(id);
+"use strict";
 
-async function api(url,options={}){
- const r=await fetch(url,{...options,headers:{"Content-Type":"application/json",...(options.headers||{})}});
- const d=await r.json();
- if(!r.ok)throw Error(d.error||"Request failed");
- return d;
+const API = {
+    products: "/api/products",
+    dashboard: "/api/dashboard",
+    stock: "/api/stock",
+    transactions: "/api/transactions",
+    report: "/api/report"
+};
+
+let productsCache = [];
+let searchTimer;
+
+const $ = id => document.getElementById(id);
+
+function escapeHTML(value) {
+    return String(value ?? "").replace(/[&<>"']/g, ch => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+    })[ch]);
 }
-function msg(s){$("message").textContent=s}
 
-async function loadDashboard(){
- const d=await api("/api/dashboard");
- $("total").textContent=d.total_products;
- $("value").textContent="₹"+Number(d.stock_value).toLocaleString("en-IN");
- $("low").textContent=d.low_stock;
- $("units").textContent=d.total_units;
-}
-
-async function loadProducts(){
- try{
-  const q=encodeURIComponent($("search").value);
-  const c=encodeURIComponent($("categoryFilter").value);
-  const items=await api(`/api/products?search=${q}&category=${c}`);
-  const body=$("products");body.replaceChildren();
-  const categories=[...new Set(items.map(p=>p.category))];
-  const old=$("categoryFilter").value;
-  $("categoryFilter").replaceChildren(new Option("All categories",""));
-  categories.forEach(c=>$("categoryFilter").add(new Option(c,c)));
-  $("categoryFilter").value=categories.includes(old)?old:"";
-
-  const stock=$("stockProduct");stock.replaceChildren();
-  items.forEach(p=>{
-   stock.add(new Option(`${p.name} (${p.quantity})`,p.id));
-   const tr=document.createElement("tr");
-   [p.id,p.name,p.category,p.price,p.quantity,
-    (p.quantity*Number(p.price)).toFixed(2),
-    p.quantity<=p.min_stock?"Low Stock":"Available"].forEach(v=>{
-      const td=document.createElement("td");td.textContent=v;
-      if(v==="Low Stock")td.className="low";
-      tr.appendChild(td);
+function formatNumber(value) {
+    return Number(value || 0).toLocaleString("en-IN", {
+        maximumFractionDigits: 2
     });
-   const td=document.createElement("td");
-   const edit=document.createElement("button");edit.textContent="Edit";
-   edit.onclick=()=>editProduct(p);
-   const del=document.createElement("button");del.textContent="Delete";
-   del.onclick=()=>deleteProduct(p.id);
-   td.append(edit,del);tr.appendChild(td);body.appendChild(tr);
-  });
- }catch(e){msg(e.message)}
 }
 
-function editProduct(p){
- $("editId").value=p.id;$("name").value=p.name;
- $("category").value=p.category;$("price").value=p.price;
- $("quantity").value=p.quantity;$("minStock").value=p.min_stock;
- $("formTitle").textContent="Edit Product";
- window.scrollTo(0,0);
-}
-function resetForm(){
- $("productForm").reset();$("editId").value="";
- $("formTitle").textContent="Add Product";$("minStock").value=5;
+function formatCurrency(value) {
+    return Number(value || 0).toLocaleString("en-IN", {
+        style: "currency",
+        currency: "INR",
+        maximumFractionDigits: 2
+    });
 }
 
-$("productForm").onsubmit=async e=>{
- e.preventDefault();
- const id=$("editId").value;
- const data={name:$("name").value,category:$("category").value,
- price:$("price").value,quantity:$("quantity").value,min_stock:$("minStock").value};
- try{
-  if(id){
-   await api(`/api/products/${id}`,{method:"PUT",body:JSON.stringify(data)});
-   msg("Product updated");
-  }else{
-   await api("/api/products",{method:"POST",body:JSON.stringify(data)});
-   msg("Product added");
-  }
-  resetForm();await refresh();
- }catch(err){msg(err.message)}
-};
-
-async function deleteProduct(id){
- if(!confirm("Delete this product and its transaction history?"))return;
- try{await api(`/api/products/${id}`,{method:"DELETE"});msg("Product deleted");await refresh()}
- catch(e){msg(e.message)}
+function showToast(message, isError = false) {
+    const toast = document.createElement("div");
+    toast.className = "toast" + (isError ? " error" : "");
+    toast.textContent = message;
+    $("toastArea").appendChild(toast);
+    setTimeout(() => toast.remove(), 4000);
 }
 
-$("stockForm").onsubmit=async e=>{
- e.preventDefault();
- try{
-  await api("/api/stock",{method:"POST",body:JSON.stringify({
-   product_id:$("stockProduct").value,type:$("stockType").value,
-   quantity:$("stockQty").value
-  })});
-  msg("Stock updated");$("stockForm").reset();await refresh();
- }catch(err){msg(err.message)}
-};
+function setMessage(id, message = "", type = "") {
+    $(id).textContent = message;
+    $(id).className = "message" + (type ? " " + type : "");
+}
 
-async function loadTransactions(){
- const rows=await api("/api/transactions");
- const body=$("transactions");body.replaceChildren();
- rows.forEach(t=>{
-  const tr=document.createElement("tr");
-  [t.product,t.transaction_type,t.quantity,new Date(t.created_at).toLocaleString()]
-   .forEach(v=>{const td=document.createElement("td");td.textContent=v;tr.appendChild(td)});
-  body.appendChild(tr);
- });
+function setBusy(button, busy, busyText) {
+    if (!button.dataset.originalText) {
+        button.dataset.originalText = button.textContent;
+    }
+
+    button.disabled = busy;
+    button.textContent = busy ? busyText : button.dataset.originalText;
 }
-async function refresh(){
- try{await Promise.all([loadProducts(),loadDashboard(),loadTransactions()])}
- catch(e){msg("Cannot load data: "+e.message)}
+
+async function apiRequest(url, options = {}) {
+    const response = await fetch(url, {
+        ...options,
+        headers: {
+            ...(options.body ? { "Content-Type": "application/json" } : {}),
+            ...(options.headers || {})
+        }
+    });
+
+    const contentType = response.headers.get("content-type") || "";
+    const data = contentType.includes("application/json")
+        ? await response.json()
+        : await response.text();
+
+    if (!response.ok) {
+        throw new Error(
+            typeof data === "object"
+                ? data.error || data.message || `Request failed (${response.status})`
+                : data || `Request failed (${response.status})`
+        );
+    }
+
+    return data;
 }
-async function exportExcel(){
- try{
-  const r=await fetch("/api/report");
-  if(!r.ok)throw Error("Report export failed");
-  const blob=await r.blob(),url=URL.createObjectURL(blob);
-  const a=document.createElement("a");a.href=url;a.download="inventory_report.xlsx";a.click();
-  URL.revokeObjectURL(url);msg("Excel report downloaded");
- }catch(e){msg(e.message)}
+
+function getProduct(id) {
+    return productsCache.find(p => Number(p.id) === Number(id));
 }
-refresh();
+
+/* Dashboard */
+async function loadDashboard() {
+    const data = await apiRequest(API.dashboard);
+
+    $("totalProducts").textContent = formatNumber(data.total_products);
+    $("stockValue").textContent = formatCurrency(data.stock_value);
+    $("lowStock").textContent = formatNumber(data.low_stock);
+}
+
+/* Products */
+async function loadProducts() {
+    const params = new URLSearchParams({
+        search: $("searchInput").value.trim(),
+        category: $("categoryFilter").value
+    });
+
+    const data = await apiRequest(`${API.products}?${params}`);
+
+    if (!Array.isArray(data)) {
+        throw new Error("The products API did not return a list.");
+    }
+
+    productsCache = data;
+    renderStockProducts();
+    renderProducts();
+}
+
+function renderStockProducts() {
+    const select = $("stockProduct");
+    const previous = select.value;
+
+    select.innerHTML = '<option value="">Select product</option>' +
+        [...productsCache]
+            .sort((a, b) => String(a.name).localeCompare(String(b.name)))
+            .map(p => `<option value="${Number(p.id)}">${escapeHTML(p.name)} (Qty: ${formatNumber(p.quantity)})</option>`)
+            .join("");
+
+    if (productsCache.some(p => String(p.id) === previous)) {
+        select.value = previous;
+    }
+}
+
+function renderProducts() {
+    const products = productsCache;
+
+    $("productCount").textContent = `${products.length} products`;
+    $("productTableStatus").textContent = `Showing ${products.length} products`;
+
+    if (!products.length) {
+        $("productsBody").innerHTML =
+            '<tr><td colspan="8" class="empty">No products found.</td></tr>';
+        return;
+    }
+
+    $("productsBody").innerHTML = products.map(p => {
+        const qty = Number(p.quantity || 0);
+        const min = Number(p.min_stock || 0);
+        const price = Number(p.price || 0);
+
+        const statusClass = qty === 0
+            ? "out-stock"
+            : qty <= min
+                ? "low-stock"
+                : "in-stock";
+
+        const statusText = qty === 0
+            ? "Out of Stock"
+            : qty <= min
+                ? "Low Stock"
+                : "In Stock";
+
+        return `<tr>
+            <td>${Number(p.id)}</td>
+            <td><strong>${escapeHTML(p.name)}</strong></td>
+            <td>${escapeHTML(p.category)}</td>
+            <td>${formatCurrency(price)}</td>
+            <td>${formatNumber(qty)}</td>
+            <td>${formatCurrency(qty * price)}</td>
+            <td><span class="badge ${statusClass}">${statusText}</span></td>
+            <td>
+                <div class="actions">
+                    <button class="secondary small" data-action="edit" data-id="${Number(p.id)}" type="button">Edit</button>
+                    <button class="danger small" data-action="delete" data-id="${Number(p.id)}" type="button">Delete</button>
+                </div>
+            </td>
+        </tr>`;
+    }).join("");
+}
+
+function resetProductForm() {
+    $("productForm").reset();
+    $("productId").value = "";
+    $("productQuantity").value = "0";
+    $("productMinStock").value = "0";
+    $("productQuantity").disabled = false;
+    $("openingStockField").hidden = false;
+    $("productFormTitle").textContent = "Add Product";
+    $("saveProductBtn").textContent = "Add Product";
+    $("cancelEditBtn").hidden = true;
+    $("editHint").hidden = true;
+    setMessage("productMessage");
+}
+
+function editProduct(id) {
+    const p = getProduct(id);
+
+    if (!p) {
+        showToast("Product not found. Refresh and try again.", true);
+        return;
+    }
+
+    $("productId").value = p.id;
+    $("productName").value = p.name || "";
+
+    const categories = [
+        "Electronics", "Accessories", "Furniture", "Stationery", "Other"
+    ];
+
+    $("productCategory").value = categories.includes(p.category)
+        ? p.category
+        : "Other";
+
+    $("productPrice").value = p.price ?? 0;
+    $("productMinStock").value = p.min_stock ?? 0;
+    $("productQuantity").value = p.quantity ?? 0;
+
+    $("productQuantity").disabled = true;
+    $("openingStockField").hidden = true;
+    $("productFormTitle").textContent = "Edit Product";
+    $("saveProductBtn").textContent = "Save Changes";
+    $("cancelEditBtn").hidden = false;
+    $("editHint").hidden = false;
+
+    setMessage("productMessage");
+    $("productCard").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+/* Add or edit product */
+$("productForm").addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const id = $("productId").value;
+    const name = $("productName").value.trim();
+    const category = $("productCategory").value;
+    const price = Number($("productPrice").value);
+    const minStock = Number($("productMinStock").value);
+    const quantity = Number($("productQuantity").value);
+
+    if (!name || !category) {
+        setMessage("productMessage", "Enter a name and select a category.", "error");
+        return;
+    }
+
+    if (!Number.isFinite(price) || price < 0 ||
+        !Number.isInteger(minStock) || minStock < 0) {
+        setMessage("productMessage", "Enter a valid price and minimum stock.", "error");
+        return;
+    }
+
+    if (!id && (!Number.isInteger(quantity) || quantity < 0)) {
+        setMessage("productMessage", "Opening quantity must be a non-negative whole number.", "error");
+        return;
+    }
+
+    const payload = { name, category, price, min_stock: minStock };
+    if (!id) payload.quantity = quantity;
+
+    const button = $("saveProductBtn");
+    setBusy(button, true, id ? "Saving..." : "Adding...");
+    setMessage("productMessage");
+
+    try {
+        const result = await apiRequest(
+            id ? `${API.products}/${id}` : API.products,
+            {
+                method: id ? "PUT" : "POST",
+                body: JSON.stringify(payload)
+            }
+        );
+
+        showToast(result.message || "Product saved successfully.");
+        resetProductForm();
+        await refreshAll();
+    } catch (error) {
+        setMessage("productMessage", error.message, "error");
+        showToast(error.message, true);
+    } finally {
+        setBusy(button, false);
+        button.textContent = $("productId").value ? "Save Changes" : "Add Product";
+    }
+});
+
+$("cancelEditBtn").addEventListener("click", resetProductForm);
+
+/* Edit and delete */
+$("productsBody").addEventListener("click", async event => {
+    const button = event.target.closest("button[data-action]");
+    if (!button) return;
+
+    const id = Number(button.dataset.id);
+
+    if (button.dataset.action === "edit") {
+        editProduct(id);
+        return;
+    }
+
+    if (button.dataset.action === "delete") {
+        const product = getProduct(id);
+
+        if (!product || !confirm(
+            `Delete "${product.name}" and its transaction history? This cannot be undone.`
+        )) return;
+
+        button.disabled = true;
+
+        try {
+            const result = await apiRequest(`${API.products}/${id}`, {
+                method: "DELETE"
+            });
+
+            if (Number($("productId").value) === id) {
+                resetProductForm();
+            }
+
+            showToast(result.message || "Product deleted.");
+            await refreshAll();
+        } catch (error) {
+            showToast(error.message, true);
+        } finally {
+            button.disabled = false;
+        }
+    }
+});
+
+/* Stock movements */
+$("stockForm").addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const productId = Number($("stockProduct").value);
+    const type = $("stockType").value;
+    const quantity = Number($("stockQuantity").value);
+
+    if (!Number.isInteger(productId) || productId <= 0) {
+        setMessage("stockMessage", "Select a product.", "error");
+        return;
+    }
+
+    if (!["IN", "OUT"].includes(type)) {
+        setMessage("stockMessage", "Select Stock In or Stock Out.", "error");
+        return;
+    }
+
+    if (!Number.isInteger(quantity) || quantity <= 0) {
+        setMessage("stockMessage", "Quantity must be a whole number greater than zero.", "error");
+        return;
+    }
+
+    const product = getProduct(productId);
+
+    if (type === "OUT" && product && quantity > Number(product.quantity)) {
+        setMessage("stockMessage", `Insufficient stock. Available quantity: ${product.quantity}.`, "error");
+        return;
+    }
+
+    const button = $("updateStockBtn");
+    setBusy(button, true, "Updating...");
+    setMessage("stockMessage");
+
+    try {
+        const result = await apiRequest(API.stock, {
+            method: "POST",
+            body: JSON.stringify({ product_id: productId, quantity, type })
+        });
+
+        setMessage("stockMessage", result.message || "Stock updated.", "success");
+        showToast(result.message || "Stock updated successfully.");
+
+        $("stockType").value = "";
+        $("stockQuantity").value = "";
+
+        await refreshAll();
+        $("stockProduct").value = String(productId);
+    } catch (error) {
+        setMessage("stockMessage", error.message, "error");
+        showToast(error.message, true);
+    } finally {
+        setBusy(button, false);
+    }
+});
+
+/* Transaction history */
+async function loadTransactions() {
+    const rows = await apiRequest(API.transactions);
+
+    if (!Array.isArray(rows)) {
+        throw new Error("The transactions API did not return a list.");
+    }
+
+    $("transactionCount").textContent = `${rows.length} transactions`;
+
+    if (!rows.length) {
+        $("transactionsBody").innerHTML =
+            '<tr><td colspan="5" class="empty">No transactions recorded yet.</td></tr>';
+        return;
+    }
+
+    $("transactionsBody").innerHTML = rows.map(t => {
+        const type = String(t.transaction_type || "").toUpperCase();
+        const productName = t.product ||
+            getProduct(t.product_id)?.name ||
+            `Product ID ${t.product_id ?? ""}`;
+
+        return `<tr>
+            <td>#${Number(t.id)}</td>
+            <td>${escapeHTML(productName)}</td>
+            <td><span class="badge ${type === "IN" ? "in" : "out"}">${type === "IN" ? "Stock In" : "Stock Out"}</span></td>
+            <td>${formatNumber(t.quantity)}</td>
+            <td>${escapeHTML(t.created_at || "—")}</td>
+        </tr>`;
+    }).join("");
+}
+
+/* Refresh all data */
+async function refreshAll() {
+    const tasks = [
+        ["Products", loadProducts],
+        ["Dashboard", loadDashboard],
+        ["Transactions", loadTransactions]
+    ];
+
+    const results = await Promise.allSettled(tasks.map(([, fn]) => fn()));
+
+    const errors = results
+        .map((result, index) => result.status === "rejected"
+            ? `${tasks[index][0]}: ${result.reason.message}`
+            : null)
+        .filter(Boolean);
+
+    $("lastUpdated").textContent = "Updated " + new Date().toLocaleTimeString();
+
+    if (errors.length) {
+        console.error(errors);
+        showToast(errors.join(" | "), true);
+    }
+
+    return errors.length === 0;
+}
+
+/* Search and category filter */
+$("searchInput").addEventListener("input", () => {
+    clearTimeout(searchTimer);
+
+    searchTimer = setTimeout(async () => {
+        try {
+            await loadProducts();
+        } catch (error) {
+            showToast(error.message, true);
+        }
+    }, 250);
+});
+
+$("categoryFilter").addEventListener("change", async () => {
+    try {
+        await loadProducts();
+    } catch (error) {
+        showToast(error.message, true);
+    }
+});
+
+$("clearFiltersBtn").addEventListener("click", async () => {
+    $("searchInput").value = "";
+    $("categoryFilter").value = "";
+
+    try {
+        await loadProducts();
+    } catch (error) {
+        showToast(error.message, true);
+    }
+});
+
+/* Refresh button */
+$("refreshBtn").addEventListener("click", async () => {
+    const button = $("refreshBtn");
+    setBusy(button, true, "Refreshing...");
+
+    try {
+        await refreshAll();
+    } finally {
+        setBusy(button, false);
+    }
+});
+
+/* Excel export */
+$("exportBtn").addEventListener("click", async () => {
+    const button = $("exportBtn");
+    setBusy(button, true, "Preparing Excel...");
+
+    try {
+        const response = await fetch(API.report);
+
+        if (!response.ok) {
+            let message = `Excel export failed (${response.status})`;
+
+            try {
+                const data = await response.json();
+                message = data.error || data.message || message;
+            } catch (_) {}
+
+            throw new Error(message);
+        }
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+
+        link.href = url;
+        link.download = "inventory_report.xlsx";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        showToast("Excel report downloaded successfully.");
+    } catch (error) {
+        showToast(error.message, true);
+    } finally {
+        setBusy(button, false);
+    }
+});
+
+/* Initialize */
+document.addEventListener("DOMContentLoaded", () => {
+    refreshAll();
+});
 </script>
+
 </body>
 </html>
