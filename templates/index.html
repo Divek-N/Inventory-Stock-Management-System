@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inventory Management</title>
+<style>
+body{font-family:Arial;background:#f3f5f9;margin:25px;color:#1f2937}
+header,.cards,.filters,form{display:flex;gap:12px;flex-wrap:wrap}
+header{justify-content:space-between;align-items:center}
+.cards{margin:20px 0}
+.card,section{background:white;padding:18px;border-radius:10px;margin-bottom:18px;flex:1}
+input,select,button{padding:10px;border:1px solid #ddd;border-radius:5px}
+button{background:#2563eb;color:white;cursor:pointer}
+table{width:100%;border-collapse:collapse;margin-top:15px;background:white}
+th,td{text-align:left;padding:10px;border-bottom:1px solid #ddd}
+th{background:#e8efff}
+.wrap{overflow-x:auto}.low{color:#dc2626;font-weight:bold}
+#message{font-weight:bold}
+</style>
+</head>
+<body>
+<header><h1>Inventory Management System</h1>
+<button onclick="exportExcel()">Export Excel</button></header>
+
+<div class="cards">
+<section class="card">Total Products<h2 id="total">Loading...</h2></section>
+<section class="card">Stock Value<h2 id="value">Loading...</h2></section>
+<section class="card">Low Stock<h2 id="low">Loading...</h2></section>
+<section class="card">Total Units<h2 id="units">Loading...</h2></section>
+</div>
+
+<section>
+<h2 id="formTitle">Add Product</h2>
+<form id="productForm">
+<input id="editId" type="hidden">
+<input id="name" placeholder="Product name" required>
+<input id="category" placeholder="Category" required>
+<input id="price" type="number" min="0" step=".01" placeholder="Price" required>
+<input id="quantity" type="number" min="0" step="1" placeholder="Quantity" required>
+<input id="minStock" type="number" min="0" value="5" placeholder="Minimum stock" required>
+<button>Save Product</button>
+<button type="button" onclick="resetForm()">Cancel</button>
+</form>
+</section>
+
+<section>
+<h2>Stock In / Out</h2>
+<form id="stockForm">
+<select id="stockProduct" required></select>
+<select id="stockType"><option value="IN">Stock In</option><option value="OUT">Stock Out</option></select>
+<input id="stockQty" type="number" min="1" step="1" placeholder="Quantity" required>
+<button>Update Stock</button>
+</form>
+</section>
+
+<section>
+<h2>Products</h2>
+<div class="filters">
+<input id="search" placeholder="Search product" oninput="loadProducts()">
+<select id="categoryFilter" onchange="loadProducts()">
+<option value="">All categories</option>
+</select>
+</div>
+<div class="wrap"><table>
+<thead><tr><th>ID</th><th>Name</th><th>Category</th><th>Price</th><th>Qty</th><th>Value</th><th>Status</th><th>Actions</th></tr></thead>
+<tbody id="products"></tbody>
+</table></div>
+<h2>Recent Stock Transactions</h2>
+<div class="wrap"><table>
+<thead><tr><th>Product</th><th>Type</th><th>Quantity</th><th>Date</th></tr></thead>
+<tbody id="transactions"></tbody>
+</table></div>
+<p id="message"></p>
+</section>
+
+<script>
+const $=id=>document.getElementById(id);
+
+async function api(url,options={}){
+ const r=await fetch(url,{...options,headers:{"Content-Type":"application/json",...(options.headers||{})}});
+ const d=await r.json();
+ if(!r.ok)throw Error(d.error||"Request failed");
+ return d;
+}
+function msg(s){$("message").textContent=s}
+
+async function loadDashboard(){
+ const d=await api("/api/dashboard");
+ $("total").textContent=d.total_products;
+ $("value").textContent="₹"+Number(d.stock_value).toLocaleString("en-IN");
+ $("low").textContent=d.low_stock;
+ $("units").textContent=d.total_units;
+}
+
+async function loadProducts(){
+ try{
+  const q=encodeURIComponent($("search").value);
+  const c=encodeURIComponent($("categoryFilter").value);
+  const items=await api(`/api/products?search=${q}&category=${c}`);
+  const body=$("products");body.replaceChildren();
+  const categories=[...new Set(items.map(p=>p.category))];
+  const old=$("categoryFilter").value;
+  $("categoryFilter").replaceChildren(new Option("All categories",""));
+  categories.forEach(c=>$("categoryFilter").add(new Option(c,c)));
+  $("categoryFilter").value=categories.includes(old)?old:"";
+
+  const stock=$("stockProduct");stock.replaceChildren();
+  items.forEach(p=>{
+   stock.add(new Option(`${p.name} (${p.quantity})`,p.id));
+   const tr=document.createElement("tr");
+   [p.id,p.name,p.category,p.price,p.quantity,
+    (p.quantity*Number(p.price)).toFixed(2),
+    p.quantity<=p.min_stock?"Low Stock":"Available"].forEach(v=>{
+      const td=document.createElement("td");td.textContent=v;
+      if(v==="Low Stock")td.className="low";
+      tr.appendChild(td);
+    });
+   const td=document.createElement("td");
+   const edit=document.createElement("button");edit.textContent="Edit";
+   edit.onclick=()=>editProduct(p);
+   const del=document.createElement("button");del.textContent="Delete";
+   del.onclick=()=>deleteProduct(p.id);
+   td.append(edit,del);tr.appendChild(td);body.appendChild(tr);
+  });
+ }catch(e){msg(e.message)}
+}
+
+function editProduct(p){
+ $("editId").value=p.id;$("name").value=p.name;
+ $("category").value=p.category;$("price").value=p.price;
+ $("quantity").value=p.quantity;$("minStock").value=p.min_stock;
+ $("formTitle").textContent="Edit Product";
+ window.scrollTo(0,0);
+}
+function resetForm(){
+ $("productForm").reset();$("editId").value="";
+ $("formTitle").textContent="Add Product";$("minStock").value=5;
+}
+
+$("productForm").onsubmit=async e=>{
+ e.preventDefault();
+ const id=$("editId").value;
+ const data={name:$("name").value,category:$("category").value,
+ price:$("price").value,quantity:$("quantity").value,min_stock:$("minStock").value};
+ try{
+  if(id){
+   await api(`/api/products/${id}`,{method:"PUT",body:JSON.stringify(data)});
+   msg("Product updated");
+  }else{
+   await api("/api/products",{method:"POST",body:JSON.stringify(data)});
+   msg("Product added");
+  }
+  resetForm();await refresh();
+ }catch(err){msg(err.message)}
+};
+
+async function deleteProduct(id){
+ if(!confirm("Delete this product and its transaction history?"))return;
+ try{await api(`/api/products/${id}`,{method:"DELETE"});msg("Product deleted");await refresh()}
+ catch(e){msg(e.message)}
+}
+
+$("stockForm").onsubmit=async e=>{
+ e.preventDefault();
+ try{
+  await api("/api/stock",{method:"POST",body:JSON.stringify({
+   product_id:$("stockProduct").value,type:$("stockType").value,
+   quantity:$("stockQty").value
+  })});
+  msg("Stock updated");$("stockForm").reset();await refresh();
+ }catch(err){msg(err.message)}
+};
+
+async function loadTransactions(){
+ const rows=await api("/api/transactions");
+ const body=$("transactions");body.replaceChildren();
+ rows.forEach(t=>{
+  const tr=document.createElement("tr");
+  [t.product,t.transaction_type,t.quantity,new Date(t.created_at).toLocaleString()]
+   .forEach(v=>{const td=document.createElement("td");td.textContent=v;tr.appendChild(td)});
+  body.appendChild(tr);
+ });
+}
+async function refresh(){
+ try{await Promise.all([loadProducts(),loadDashboard(),loadTransactions()])}
+ catch(e){msg("Cannot load data: "+e.message)}
+}
+async function exportExcel(){
+ try{
+  const r=await fetch("/api/report");
+  if(!r.ok)throw Error("Report export failed");
+  const blob=await r.blob(),url=URL.createObjectURL(blob);
+  const a=document.createElement("a");a.href=url;a.download="inventory_report.xlsx";a.click();
+  URL.revokeObjectURL(url);msg("Excel report downloaded");
+ }catch(e){msg(e.message)}
+}
+refresh();
+</script>
+</body>
+</html>
