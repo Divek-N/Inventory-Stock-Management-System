@@ -29,11 +29,19 @@ A web-based inventory management application built using Python, Flask, and MySQ
 
 ### Dashboard and Inventory
 
-![Inventory Dashboard](Screenshots/powerBIDashboard.png)
+![Inventory Dashboard](Screenshots/Website%203.png)
 
 ### Stock Management and Transactions
 
-![Stock Management](Screenshots/stock-management.png)
+![Stock Management](Screenshots/Website2.png)
+
+### Product Management
+
+![Product Management](Screenshots/Website1.png)
+
+### Power BI Dashboard
+
+![Power BI Dashboard](Screenshots/powerBI%20Dashboard.png)
 
 ## Project Structure
 
