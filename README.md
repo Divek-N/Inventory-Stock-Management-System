@@ -54,14 +54,16 @@ Inventory-Stock-Management-System/
 │   ├── schema.sql
 │   └── sample_data.sql
 ├── Screenshots/
-│   ├── dashboard.png
-│   └── stock-management.png
+│   ├── Website 3.png
+│   ├── Website1.png
+│   ├── Website2.png
+│   └── powerBI Dashboard.png
 ├── Inventory.pbix
 ├── .gitignore
 └── README.md
 ```
 
-The database SQL files are included in the structure above only if they exist in the repository.
+*Note: Ensure the files and folders listed above exist in your repository.*
 
 ## Installation and Setup
 
@@ -72,13 +74,13 @@ git clone https://github.com/Divek-N/Inventory-Stock-Management-System.git
 cd Inventory-Stock-Management-System
 ```
 
-### 2. Create and activate a virtual environment
+### 2. Create a virtual environment
 
 ```bash
 python -m venv venv
 ```
 
-Windows PowerShell:
+Activate it in Windows PowerShell:
 
 ```powershell
 .\venv\Scripts\Activate.ps1
@@ -92,9 +94,9 @@ python -m pip install Flask mysql-connector-python pandas openpyxl python-dotenv
 
 ### 4. Configure the database
 
-Create the MySQL database and required tables according to the application's database schema.
+Create the MySQL database and required tables using the SQL schema provided in the repository, if available.
 
-Create a local `.env` file in the project root:
+Create a `.env` file in the project root:
 
 ```dotenv
 DB_HOST=localhost
@@ -104,15 +106,15 @@ DB_PASSWORD=your_mysql_password
 DB_NAME=inventory_db
 ```
 
-Replace `your_mysql_password` with your own local MySQL password. Never commit this file to GitHub.
+Replace `your_mysql_password` with your local MySQL password. Never upload your `.env` file or database credentials to GitHub.
 
-### 5. Start the application
+### 5. Run the application
 
 ```bash
 python app.py
 ```
 
-Open the following URL in your browser:
+Open the application in your browser:
 
 http://127.0.0.1:5000/
 
@@ -134,7 +136,7 @@ The application exports an Excel workbook containing:
 
 **Divek N.**
 
-GitHub: [Divek-N](https://github.com/Divek-N)
+GitHub: https://github.com/Divek-N
 
 ## License
 
