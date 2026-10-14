@@ -2,3 +2,5 @@
 venv/
 __pycache__/
 *.pyc
+inventory_report.xlsx
+~$inventory_report.xlsx
